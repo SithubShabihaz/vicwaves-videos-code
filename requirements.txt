@@ -1,0 +1,6 @@
+fastapi
+uvicorn
+moviepy==1.0.3
+requests
+pydantic
+pillow
