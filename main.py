@@ -2,30 +2,36 @@ import os
 import textwrap
 import requests
 import subprocess
+from urllib.parse import quote
 
 IMAGE_URL = os.environ.get("IMAGE_URL")
 AUDIO_URL = os.environ.get("AUDIO_URL")
 CALLBACK_URL = os.environ.get("CALLBACK_URL")
 POST_TITLE = os.environ.get("POST_TITLE", "Upcoming Social Security Adjustment")
-# Aap n8n ya environment se description bhi bhej sakti hain, yahan default text hai:
-POST_DESC = os.environ.get("POST_DESC", "The upcoming social security adjustment is drawing significant attention as early projections suggest beneficiaries could receive one of the largest Cost of Living Adjustments in recent years...")
+POST_DESC = os.environ.get("POST_DESC", "The upcoming social security adjustment is drawing significant attention...")
 
 def make_video():
     print("Downloading files...")
     
-    # 1. Download Image
-    img_response = requests.get(IMAGE_URL)
-    if img_response.status_code != 200 or len(img_response.content) < 100:
-        raise Exception(f"Failed to download valid image from {IMAGE_URL}")
-    with open("image.webp", "wb") as f:
-        f.write(img_response.content)
+    # User-Agent header taake server request ko block na kare
+    headers = {'User-Agent': 'Mozilla/5.0'}
 
-    # 2. Download Audio
-    audio_response = requests.get(AUDIO_URL)
-    if audio_response.status_code != 200 or len(audio_response.content) < 100:
-        raise Exception(f"Failed to download valid audio from {AUDIO_URL}")
-    with open("audio.mp3", "wb") as f:
-        f.write(audio_response.content)
+    # 1. Download Image
+    if IMAGE_URL:
+        img_response = requests.get(IMAGE_URL, headers=headers)
+        if img_response.status_code != 200 or len(img_response.content) < 100:
+            raise Exception(f"Failed to download valid image from {IMAGE_URL}")
+        with open("image.webp", "wb") as f:
+            f.write(img_response.content)
+
+    # 2. Download Audio (Spaces aur special characters ko handle karne ke liye safe encoding)
+    if AUDIO_URL:
+        encoded_audio_url = AUDIO_URL.replace(" ", "%20")
+        audio_response = requests.get(encoded_audio_url, headers=headers)
+        if audio_response.status_code != 200 or len(audio_response.content) < 100:
+            raise Exception(f"Failed to download valid audio from {AUDIO_URL} (Status: {audio_response.status_code})")
+        with open("audio.mp3", "wb") as f:
+            f.write(audio_response.content)
 
     print("Generating video with Breaking News badge, Image, Title and Description...")
 
@@ -41,7 +47,7 @@ def make_video():
     # Linux GitHub runner par mojood standard bold font ka path:
     font_path = "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"
 
-    # 3. FFmpeg command: Multi-filter setup (Breaking News badge, Image, Title, Description)
+    # 3. FFmpeg command
     ffmpeg_command = [
         'ffmpeg',
         '-y',
@@ -51,7 +57,6 @@ def make_video():
         '-filter_complex',
         # Background 1080x1920 (black)
         f'color=c=black:s=1080x1920:d=10[base];'
-        # Image ko thoda neechay set karna taake uper "Breaking News" badge ke liye jagah ban jaye (overlay=0:120)
         f'[0:v]scale=1080:-1[img];'
         f'[base][img]overlay=0:120[bg_with_img];'
         # Filter 1: Upar Red "Breaking News" Badge
