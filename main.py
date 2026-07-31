@@ -6,7 +6,7 @@ import subprocess
 IMAGE_URL = os.environ.get("IMAGE_URL")
 AUDIO_URL = os.environ.get("AUDIO_URL")
 CALLBACK_URL = os.environ.get("CALLBACK_URL")
-POST_TITLE = os.environ.get("POST_TITLE", "Breaking News And Latest Updates")
+POST_TITLE = os.environ.get("POST_TITLE", "Trump Warns Mamdani")
 
 def make_video():
     print("Downloading files...")
@@ -25,17 +25,19 @@ def make_video():
     with open("audio.mp3", "wb") as f:
         f.write(audio_response.content)
 
-    print("Generating video with Breaking News badge and bold title...")
+    print("Generating video with bold fontfile and yellow style...")
 
-    # Title ko clean karna aur Sentence Case rakhna
+    # Title ko clean karna
     clean_title = str(POST_TITLE).strip().replace("'", "").replace('"', "").replace(":", "-")
-    formatted_sentence = clean_title.capitalize()
 
-    # Text wrapping: Baray font ke liye width choti rakhi hai taake text theek se wrap ho
-    wrapped_lines = textwrap.wrap(formatted_sentence, width=26)
+    # Text wrapping
+    wrapped_lines = textwrap.wrap(clean_title, width=24)
     formatted_title = "\n".join(wrapped_lines)
 
-    # 3. FFmpeg command: Pehle Breaking News ka badge, phir main bara title draw karega
+    # Linux GitHub runner par mojood standard bold font ka path:
+    font_path = "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"
+
+    # 3. FFmpeg command: Red Breakingnews badge aur Bold Yellow text
     ffmpeg_command = [
         'ffmpeg',
         '-y',
@@ -47,10 +49,10 @@ def make_video():
         f'color=c=black:s=1080x1920:d=10[base];'
         f'[0:v]scale=1080:-1[img];'
         f'[base][img]overlay=0:0[bg_with_img];'
-        # Filter 1: Upar "Breaking News" ka blue/dark rounded style box aur text
-        f'[bg_with_img]drawtext=text=\'Breaking News\':fontcolor=white:fontsize=60:box=1:boxcolor=navy@0.9:boxborderw=18:x=(w-text_w)/2:y=1010[with_badge];'
-        # Filter 2: Neeche main bara bold title
-        f'[with_badge]drawtext=text=\'{formatted_title}\':fontcolor=white:fontsize=70:line_spacing=-4:box=1:boxcolor=black@0.95:boxborderw=18:x=50:y=900[final]',
+        # Red "Breakingnews" Badge upar
+        f'[bg_with_img]drawtext=fontfile=\'{font_path}\':text=\'Breakingnews\':fontcolor=white:fontsize=48:box=1:boxcolor=navy@0.95:boxborderw=20:x=(w-text_w)/2:y=990[with_badge];'
+        # Neeche Main Bold Yellow Title
+        f'[with_badge]drawtext=fontfile=\'{font_path}\':text=\'{formatted_title}\':fontcolor=white:fontsize=75:line_spacing=2:x=(w-text_w)/2:y=800[final]',
         '-map', '[final]',
         '-map', '1:a',
         '-shortest',
