@@ -1,7 +1,24 @@
 name: Generate Video
+
 on:
-  repository_dispatch:
-    types: [create-video]
+  workflow_dispatch:
+    inputs:
+      image_url:
+        description: 'Image URL'
+        required: true
+        type: string
+      audio_url:
+        description: 'Audio URL'
+        required: true
+        type: string
+      callback_url:
+        description: 'Callback URL'
+        required: true
+        type: string
+      post_title:
+        description: 'Post Title'
+        required: true
+        type: string
 
 jobs:
   build:
@@ -21,9 +38,9 @@ jobs:
           pip install -r requirements.txt
           
       - name: Run Video Script
-      env:
-        IMAGE_URL: ${{ github.event.client_payload.image_url }}
-        AUDIO_URL: ${{ github.event.client_payload.audio_url }}
-        CALLBACK_URL: ${{ github.event.client_payload.callback_url }}
-        POST_TITLE: ${{ github.event.client_payload.post_title }}
-      run: python main.py
+        env:
+          IMAGE_URL: ${{ github.event.inputs.image_url }}
+          AUDIO_URL: ${{ github.event.inputs.audio_url }}
+          CALLBACK_URL: ${{ github.event.inputs.callback_url }}
+          POST_TITLE: ${{ github.event.inputs.post_title }}
+        run: python main.py
