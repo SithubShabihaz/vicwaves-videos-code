@@ -25,19 +25,19 @@ def make_video():
     with open("audio.mp3", "wb") as f:
         f.write(audio_response.content)
 
-    print("Generating video with bold fontfile and yellow style...")
+    print("Generating video with bold font and left/right spacing...")
 
     # Title ko clean karna
     clean_title = str(POST_TITLE).strip().replace("'", "").replace('"', "").replace(":", "-")
 
-    # Text wrapping
-    wrapped_lines = textwrap.wrap(clean_title, width=24)
+    # Text wrapping: width=22 rakhne se text dono sides (left aur right) se andar rahega aur katega nahi
+    wrapped_lines = textwrap.wrap(clean_title, width=22)
     formatted_title = "\n".join(wrapped_lines)
 
     # Linux GitHub runner par mojood standard bold font ka path:
     font_path = "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"
 
-    # 3. FFmpeg command: Red Breakingnews badge aur Bold Yellow text
+    # 3. FFmpeg command: Breaking news remove kar diya gaya hai aur x=60 se left/right margin set hai
     ffmpeg_command = [
         'ffmpeg',
         '-y',
@@ -49,10 +49,8 @@ def make_video():
         f'color=c=black:s=1080x1920:d=10[base];'
         f'[0:v]scale=1080:-1[img];'
         f'[base][img]overlay=0:0[bg_with_img];'
-        # Red "Breakingnews" Badge upar
-        f'[bg_with_img]drawtext=fontfile=\'{font_path}\':text=\'Breakingnews\':fontcolor=white:fontsize=48:box=1:boxcolor=navy@0.95:boxborderw=20:x=(w-text_w)/2:y=990[with_badge];'
-        # Neeche Main Bold Yellow Title
-        f'[with_badge]drawtext=fontfile=\'{font_path}\':text=\'{formatted_title}\':fontcolor=white:fontsize=75:line_spacing=2:x=(w-text_w)/2:y=800[final]',
+        # Main Bold Title (x=60 se left margin mil gaya hai, aur boxborderw=30 se padding set hai)
+        f'[bg_with_img]drawtext=fontfile=\'{font_path}\':text=\'{formatted_title}\':fontcolor=white:fontsize=75:line_spacing=4:box=1:boxcolor=black@0.95:boxborderw=30:x=60:y=800[final]',
         '-map', '[final]',
         '-map', '1:a',
         '-shortest',
