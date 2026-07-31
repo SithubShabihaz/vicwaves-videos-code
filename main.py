@@ -58,7 +58,7 @@ def make_video():
         # Background 1080x1920 (black)
         f'color=c=black:s=1080x1920:d=10[base];'
         f'[0:v]scale=1080:-1[img];'
-        f'[base][img]overlay=0:120[bg_with_img];'
+        f'[base][img]overlay=0:220[bg_with_img];'
         # Filter 1: Upar Red "Breaking News" Badge
         f'[bg_with_img]drawtext=fontfile=\'{font_path}\':text=\'Breaking News\':fontcolor=white:fontsize=46:box=1:boxcolor=red@0.95:boxborderw=18:x=(w-text_w)/2:y=80[with_badge];'
         # Filter 2: Image ke neeche Center-aligned Main Title
