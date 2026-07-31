@@ -25,17 +25,17 @@ def make_video():
     with open("audio.mp3", "wb") as f:
         f.write(audio_response.content)
 
-    print("Generating video with bold and high-placed text...")
+    print("Generating video with Breaking News badge and bold title...")
 
     # Title ko clean karna aur Sentence Case rakhna
     clean_title = str(POST_TITLE).strip().replace("'", "").replace('"', "").replace(":", "-")
     formatted_sentence = clean_title.capitalize()
 
-    # Text wrapping: width ko adjust kiya gaya hai taake text perfectly wrap ho
-    wrapped_lines = textwrap.wrap(formatted_sentence, width=28)
+    # Text wrapping: Baray font ke liye width choti rakhi hai taake text theek se wrap ho
+    wrapped_lines = textwrap.wrap(formatted_sentence, width=26)
     formatted_title = "\n".join(wrapped_lines)
 
-    # 3. FFmpeg command: Padding mazeed kam karne ke liye y=1020 kar diya hai, aur text bold set kiya hai
+    # 3. FFmpeg command: Pehle Breaking News ka badge, phir main bara title draw karega
     ffmpeg_command = [
         'ffmpeg',
         '-y',
@@ -47,8 +47,10 @@ def make_video():
         f'color=c=black:s=1080x1920:d=10[base];'
         f'[0:v]scale=1080:-1[img];'
         f'[base][img]overlay=0:0[bg_with_img];'
-        # Drawtext filter: y=1020 (top padding kam karne ke liye) aur fontsize/bold optimization
-        f'[bg_with_img]drawtext=text=\'{formatted_title}\':fontcolor=white:fontsize=60:box=1:boxcolor=black@0.95:boxborderw=20:x=60:y=1000[final]',
+        # Filter 1: Upar "Breaking News" ka blue/dark rounded style box aur text
+        f'[bg_with_img]drawtext=text=\'Breaking News\':fontcolor=white:fontsize=40:box=1:boxcolor=navy@0.9:boxborderw=18:x=(w-text_w)/2:y=1010[with_badge];'
+        # Filter 2: Neeche main bara bold title
+        f'[with_badge]drawtext=text=\'{formatted_title}\':fontcolor=white:fontsize=52:line_spacing=-2:box=1:boxcolor=black@0.95:boxborderw=25:x=50:y=1120[final]',
         '-map', '[final]',
         '-map', '1:a',
         '-shortest',
