@@ -21,8 +21,9 @@ jobs:
           pip install -r requirements.txt
           
       - name: Run Video Script
-        env:
-          IMAGE_URL: ${{ github.event.client_payload.image_url }}
-          AUDIO_URL: ${{ github.event.client_payload.audio_url }}
-          CALLBACK_URL: ${{ github.event.client_payload.callback_url }}
-        run: python main.py
+      env:
+        IMAGE_URL: ${{ github.event.client_payload.image_url }}
+        AUDIO_URL: ${{ github.event.client_payload.audio_url }}
+        CALLBACK_URL: ${{ github.event.client_payload.callback_url }}
+        POST_TITLE: ${{ github.event.client_payload.post_title }}
+      run: python main.py
