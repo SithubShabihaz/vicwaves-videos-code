@@ -2,7 +2,6 @@ import os
 import textwrap
 import requests
 import subprocess
-from urllib.parse import quote
 
 IMAGE_URL = os.environ.get("IMAGE_URL")
 AUDIO_URL = os.environ.get("AUDIO_URL")
@@ -13,7 +12,7 @@ POST_DESC = os.environ.get("POST_DESC", "The upcoming social security adjustment
 def make_video():
     print("Downloading files...")
     
-    # User-Agent header taake server request ko block na kare
+    # User-Agent header taake server request block na kare
     headers = {'User-Agent': 'Mozilla/5.0'}
 
     # 1. Download Image
@@ -24,16 +23,16 @@ def make_video():
         with open("image.webp", "wb") as f:
             f.write(img_response.content)
 
-    # 2. Download Audio (Spaces aur special characters ko handle karne ke liye safe encoding)
+    # 2. Download Audio
     if AUDIO_URL:
         encoded_audio_url = AUDIO_URL.replace(" ", "%20")
         audio_response = requests.get(encoded_audio_url, headers=headers)
         if audio_response.status_code != 200 or len(audio_response.content) < 100:
-            raise Exception(f"Failed to download valid audio from {AUDIO_URL} (Status: {audio_response.status_code})")
+            raise Exception(f"Failed to download valid audio from {AUDIO_URL}")
         with open("audio.mp3", "wb") as f:
             f.write(audio_response.content)
 
-    print("Generating video with Breaking News badge, Image, Title and Description...")
+    print("Generating video with center-aligned text lines...")
 
     # Title aur Description ko clean karna aur wrap karna
     clean_title = str(POST_TITLE).strip().replace("'", "").replace('"', "").replace(":", "-")
@@ -47,7 +46,7 @@ def make_video():
     # Linux GitHub runner par mojood standard bold font ka path:
     font_path = "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"
 
-    # 3. FFmpeg command
+    # 3. FFmpeg command: text_align=center add kar diya gaya hai taake lines center-aligned rahein
     ffmpeg_command = [
         'ffmpeg',
         '-y',
@@ -60,11 +59,11 @@ def make_video():
         f'[0:v]scale=1080:-1[img];'
         f'[base][img]overlay=0:220[bg_with_img];'
         # Filter 1: Upar Red "Breaking News" Badge
-        f'[bg_with_img]drawtext=fontfile=\'{font_path}\':text=\'Breaking News\':fontcolor=white:fontsize=46:box=1:boxcolor=red@0.95:boxborderw=18:x=(w-text_w)/2:y=80[with_badge];'
-        # Filter 2: Image ke neeche Center-aligned Main Title
-        f'[with_badge]drawtext=fontfile=\'{font_path}\':text=\'{formatted_title}\':fontcolor=white:fontsize=70:line_spacing=1:x=(w-text_w)/2:y=920[with_title];'
-        # Filter 3: Title ke neeche Description Paragraph
-        f'[with_title]drawtext=fontfile=\'{font_path}\':text=\'{formatted_desc}\':fontcolor=white@0.85:fontsize=35:line_spacing=4:x=(w-text_w)/2:y=1120[final]',
+        f'[bg_with_img]drawtext=fontfile=\'{font_path}\':text=\'Breaking News\':fontcolor=white:fontsize=46:box=1:boxcolor=red@0.95:boxborderw=18:x=(w-text_w)/2:y=70[with_badge];'
+        # Filter 2: Main Title (text_align=center ke sath taake multi-lines center mein rahein)
+        f'[with_badge]drawtext=fontfile=\'{font_path}\':text=\'{formatted_title}\':fontcolor=white:fontsize=70:line_spacing=2:text_align=center:x=(w-text_w)/2:y=820[with_title];'
+        # Filter 3: Description Paragraph (text_align=center ke sath)
+        f'[with_title]drawtext=fontfile=\'{font_path}\':text=\'{formatted_desc}\':fontcolor=white@0.85:fontsize=28:line_spacing=4:text_align=center:x=(w-text_w)/2:y=1120[final]',
         '-map', '[final]',
         '-map', '1:a',
         '-shortest',
