@@ -1,4 +1,5 @@
 import os
+import textwrap
 import requests
 import subprocess
 
@@ -24,12 +25,17 @@ def make_video():
     with open("audio.mp3", "wb") as f:
         f.write(audio_response.content)
 
-    print("Generating video using FFmpeg filter...")
+    print("Generating video with wrapped text...")
 
-    # Title ko uppercase aur clean karna
+    # Title ko uppercase karna
     clean_title = str(POST_TITLE).upper().replace("'", "").replace('"', "").replace(":", "-")
 
-    # 3. FFmpeg command: max_w hata kar text rendering ko stable aur clean banaya gaya hai
+    # Text wrapping: Python ke zariye lambe title ko 32-35 characters ki lines mein break kar dena 
+    # taake text screen par kabhi na kate aur multiline style ban jaye
+    wrapped_lines = textwrap.wrap(clean_title, width=30)
+    formatted_title = "\n".join(wrapped_lines)
+
+    # 3. FFmpeg command
     ffmpeg_command = [
         'ffmpeg',
         '-y',
@@ -41,8 +47,8 @@ def make_video():
         f'color=c=black:s=1080x1920:d=10[base];'
         f'[0:v]scale=1080:-1[img];'
         f'[base][img]overlay=0:0[bg_with_img];'
-        # Drawtext filter without max_w (fontsize aur positioning perfectly set hai)
-        f'[bg_with_img]drawtext=text=\'{clean_title}\':fontcolor=white:fontsize=42:box=1:boxcolor=black@0.95:boxborderw=35:x=50:y=1150[final]',
+        # Drawtext filter with newlines (\n) for multi-line block style
+        f'[bg_with_img]drawtext=text=\'{formatted_title}\':fontcolor=white:fontsize=46:box=1:boxcolor=black@0.95:boxborderw=40:x=60:y=1120[final]',
         '-map', '[final]',
         '-map', '1:a',
         '-shortest',
