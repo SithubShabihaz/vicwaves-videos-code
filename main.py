@@ -61,7 +61,7 @@ def make_video():
         # Filter 1: Upar Red "Breaking News" Badge
         f'[bg_with_img]drawtext=fontfile=\'{font_path}\':text=\'Breaking News\':fontcolor=white:fontsize=46:box=1:boxcolor=red@0.95:boxborderw=18:x=(w-text_w)/2:y=70[with_badge];'
         # Filter 2: Main Title (text_align=center ke sath taake multi-lines center mein rahein)
-        f'[with_badge]drawtext=fontfile=\'{font_path}\':text=\'{formatted_title}\':fontcolor=white:fontsize=70:line_spacing=2:text_align=center:x=(w-text_w)/2:y=820[with_title];'
+        f'[with_badge]drawtext=fontfile=\'{font_path}\':text=\'{formatted_title}\':fontcolor=white:fontsize=70:line_spacing=2:text_align=center:x=(w-text_w)/2:y=920[with_title];'
         # Filter 3: Description Paragraph (text_align=center ke sath)
         f'[with_title]drawtext=fontfile=\'{font_path}\':text=\'{formatted_desc}\':fontcolor=white@0.85:fontsize=28:line_spacing=4:text_align=center:x=(w-text_w)/2:y=1120[final]',
         '-map', '[final]',
