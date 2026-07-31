@@ -5,7 +5,7 @@ import subprocess
 IMAGE_URL = os.environ.get("IMAGE_URL")
 AUDIO_URL = os.environ.get("AUDIO_URL")
 CALLBACK_URL = os.environ.get("CALLBACK_URL")
-POST_TITLE = os.environ.get("POST_TITLE", "Breaking News & Latest Updates")
+POST_TITLE = os.environ.get("POST_TITLE", "BREAKING NEWS AND LATEST UPDATES")
 
 def make_video():
     print("Downloading files...")
@@ -26,10 +26,10 @@ def make_video():
 
     print("Generating video using FFmpeg filter...")
 
-    # Title ko clean karna
-    safe_title = str(POST_TITLE).replace("'", "").replace('"', "").replace(":", "-")
+    # Title ko uppercase aur clean karna taake competitor jaisa bold look aaye
+    clean_title = str(POST_TITLE).upper().replace("'", "").replace('"', "").replace(":", "-")
 
-    # 3. FFmpeg command: wrap_w hata kar proper text rendering set ki gayi hai
+    # 3. FFmpeg command: Multi-line text wrapping aur clean professional block style ke sath
     ffmpeg_command = [
         'ffmpeg',
         '-y',
@@ -37,12 +37,12 @@ def make_video():
         '-i', 'image.webp',
         '-i', 'audio.mp3',
         '-filter_complex',
-        # Background 1080x1920, image top par overlay=0:0
+        # Background 1080x1920 (black), image top par overlay=0:0
         f'color=c=black:s=1080x1920:d=10[base];'
         f'[0:v]scale=1080:-1[img];'
         f'[base][img]overlay=0:0[bg_with_img];'
-        # Drawtext without wrap_w (fontsize 46 rakhi hai taake lamba title fit aa jaye)
-        f'[bg_with_img]drawtext=text=\'{safe_title}\':fontcolor=white:fontsize=46:box=1:boxcolor=black@0.85:boxborderw=30:x=(w-text_w)/2:y=1200[final]',
+        # Drawtext filter: text wrapping aur left/center block styling
+        f'[bg_with_img]drawtext=text=\'{clean_title}\':fontcolor=white:fontsize=44:box=1:boxcolor=black@0.95:boxborderw=40:x=60:y=1150:max_w=960[final]',
         '-map', '[final]',
         '-map', '1:a',
         '-shortest',
@@ -54,7 +54,7 @@ def make_video():
     # Run command
     result = subprocess.run(ffmpeg_command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
     if result.returncode != 0:
-        raise Exception(f"Failed: {result.stderr}")
+        raise Exception(f"FFmpeg failed: {result.stderr}")
 
     print("Sending video back to n8n...")
     if CALLBACK_URL:
