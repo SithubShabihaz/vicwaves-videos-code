@@ -60,11 +60,11 @@ def make_video():
         f'[0:v]scale=1080:-1[img];'
         f'[base][img]overlay=0:120[bg_with_img];'
         # Filter 1: Upar Red "Breaking News" Badge
-        f'[bg_with_img]drawtext=fontfile=\'{font_path}\':text=\'Breaking News\':fontcolor=white:fontsize=46:box=1:boxcolor=red@0.95:boxborderw=18:x=(w-text_w)/2:y=40[with_badge];'
+        f'[bg_with_img]drawtext=fontfile=\'{font_path}\':text=\'Breaking News\':fontcolor=white:fontsize=46:box=1:boxcolor=red@0.95:boxborderw=18:x=(w-text_w)/2:y=80[with_badge];'
         # Filter 2: Image ke neeche Center-aligned Main Title
-        f'[with_badge]drawtext=fontfile=\'{font_path}\':text=\'{formatted_title}\':fontcolor=white:fontsize=52:line_spacing=2:x=(w-text_w)/2:y=720[with_title];'
+        f'[with_badge]drawtext=fontfile=\'{font_path}\':text=\'{formatted_title}\':fontcolor=white:fontsize=78:line_spacing=2:x=(w-text_w)/2:y=820[with_title];'
         # Filter 3: Title ke neeche Description Paragraph
-        f'[with_title]drawtext=fontfile=\'{font_path}\':text=\'{formatted_desc}\':fontcolor=white@0.85:fontsize=28:line_spacing=4:x=(w-text_w)/2:y=1120[final]',
+        f'[with_title]drawtext=fontfile=\'{font_path}\':text=\'{formatted_desc}\':fontcolor=white@0.85:fontsize=35:line_spacing=4:x=(w-text_w)/2:y=1120[final]',
         '-map', '[final]',
         '-map', '1:a',
         '-shortest',
