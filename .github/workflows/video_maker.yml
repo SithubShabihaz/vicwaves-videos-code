@@ -19,6 +19,10 @@ on:
         description: 'Post Title'
         required: true
         type: string
+      post_desc:
+        description: 'Post Description'
+        required: true
+        type: string
 
 jobs:
   build:
@@ -43,4 +47,5 @@ jobs:
           AUDIO_URL: ${{ github.event.inputs.audio_url }}
           CALLBACK_URL: ${{ github.event.inputs.callback_url }}
           POST_TITLE: ${{ github.event.inputs.post_title }}
+          POST_DESC: ${{ github.event.inputs.post_desc }}
         run: python main.py
