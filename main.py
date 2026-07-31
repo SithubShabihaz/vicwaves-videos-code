@@ -48,9 +48,9 @@ def make_video():
         f'[0:v]scale=1080:-1[img];'
         f'[base][img]overlay=0:0[bg_with_img];'
         # Filter 1: Upar "Breaking News" ka blue/dark rounded style box aur text
-        f'[bg_with_img]drawtext=text=\'Breaking News\':fontcolor=white:fontsize=40:box=1:boxcolor=navy@0.9:boxborderw=18:x=(w-text_w)/2:y=1010[with_badge];'
+        f'[bg_with_img]drawtext=text=\'Breaking News\':fontcolor=white:fontsize=60:box=1:boxcolor=navy@0.9:boxborderw=18:x=(w-text_w)/2:y=1010[with_badge];'
         # Filter 2: Neeche main bara bold title
-        f'[with_badge]drawtext=text=\'{formatted_title}\':fontcolor=white:fontsize=70:line_spacing=-2:box=1:boxcolor=black@0.95:boxborderw=25:x=50:y=1120[final]',
+        f'[with_badge]drawtext=text=\'{formatted_title}\':fontcolor=white:fontsize=70:line_spacing=-4:box=1:boxcolor=black@0.95:boxborderw=18:x=50:y=900[final]',
         '-map', '[final]',
         '-map', '1:a',
         '-shortest',
