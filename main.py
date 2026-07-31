@@ -6,7 +6,7 @@ import subprocess
 IMAGE_URL = os.environ.get("IMAGE_URL")
 AUDIO_URL = os.environ.get("AUDIO_URL")
 CALLBACK_URL = os.environ.get("CALLBACK_URL")
-POST_TITLE = os.environ.get("POST_TITLE", "BREAKING NEWS AND LATEST UPDATES")
+POST_TITLE = os.environ.get("POST_TITLE", "Breaking News And Latest Updates")
 
 def make_video():
     print("Downloading files...")
@@ -25,17 +25,17 @@ def make_video():
     with open("audio.mp3", "wb") as f:
         f.write(audio_response.content)
 
-    print("Generating video with wrapped text...")
+    print("Generating video with optimized text...")
 
-    # Title ko uppercase karna
-    clean_title = str(POST_TITLE).upper().replace("'", "").replace('"', "").replace(":", "-")
+    # Title ko clean karna aur Sentence Case (pehla letter capital, baqi lowercase) rakhna
+    clean_title = str(POST_TITLE).strip().replace("'", "").replace('"', "").replace(":", "-")
+    formatted_sentence = clean_title.capitalize()
 
-    # Text wrapping: Python ke zariye lambe title ko 32-35 characters ki lines mein break kar dena 
-    # taake text screen par kabhi na kate aur multiline style ban jaye
-    wrapped_lines = textwrap.wrap(clean_title, width=30)
+    # Text wrapping: width ko adjust kiya gaya hai taake baray font ke sath bhi text perfectly wrap ho
+    wrapped_lines = textwrap.wrap(formatted_sentence, width=28)
     formatted_title = "\n".join(wrapped_lines)
 
-    # 3. FFmpeg command
+    # 3. FFmpeg command: Font size 52 aur y=1080 (padding kam karne ke liye)
     ffmpeg_command = [
         'ffmpeg',
         '-y',
@@ -47,8 +47,8 @@ def make_video():
         f'color=c=black:s=1080x1920:d=10[base];'
         f'[0:v]scale=1080:-1[img];'
         f'[base][img]overlay=0:0[bg_with_img];'
-        # Drawtext filter with newlines (\n) for multi-line block style
-        f'[bg_with_img]drawtext=text=\'{formatted_title}\':fontcolor=white:fontsize=46:box=1:boxcolor=black@0.95:boxborderw=40:x=60:y=1120[final]',
+        # Drawtext filter with larger font (52) and reduced top padding (y=1080)
+        f'[bg_with_img]drawtext=text=\'{formatted_title}\':fontcolor=white:fontsize=52:box=1:boxcolor=black@0.95:boxborderw=40:x=60:y=1080[final]',
         '-map', '[final]',
         '-map', '1:a',
         '-shortest',
