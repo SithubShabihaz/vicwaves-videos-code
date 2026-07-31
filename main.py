@@ -63,7 +63,7 @@ def make_video():
         # Filter 2: Main Title (text_align=center ke sath taake multi-lines center mein rahein)
         f'[with_badge]drawtext=fontfile=\'{font_path}\':text=\'{formatted_title}\':fontcolor=white:fontsize=70:line_spacing=2:text_align=center:x=(w-text_w)/2:y=900[with_title];'
         # Filter 3: Description Paragraph (text_align=center ke sath)
-        f'[with_title]drawtext=fontfile=\'{font_path}\':text=\'{formatted_desc}\':fontcolor=white@0.85:fontsize=32:line_spacing=4:text_align=center:x=(w-text_w)/2:y=1420[final]',
+        f'[with_title]drawtext=fontfile=\'{font_path}\':text=\'{formatted_desc}\':fontcolor=white@0.85:fontsize=32:line_spacing=4:text_align=center:x=(w-text_w)/1:y=1400[final]',
         '-map', '[final]',
         '-map', '1:a',
         '-shortest',
