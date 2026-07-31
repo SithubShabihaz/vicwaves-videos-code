@@ -7,9 +7,6 @@ AUDIO_URL = os.environ.get("AUDIO_URL")
 CALLBACK_URL = os.environ.get("CALLBACK_URL")
 POST_TITLE = os.environ.get("POST_TITLE", "Breaking News & Latest Updates")
 
-# Special characters ko clean karna taake FFmpeg command crash na ho
-safe_title = str(POST_TITLE).replace("'", "").replace('"', "").replace(":", "-")
-
 def make_video():
     print("Downloading files...")
     
@@ -29,10 +26,12 @@ def make_video():
 
     print("Generating video using FFmpeg filter...")
 
-    # Title ko clean karna taake FFmpeg command mein koi error na aaye
-    safe_title = POST_TITLE.replace("'", "").replace('"', "").replace(":", "-")
+    # Title ko clean karna
+    safe_title = str(POST_TITLE).replace("'", "").replace('"', "").replace(":", "-")
 
-    # 3. FFmpeg command jo image ko upar set karegi aur neeche black box par title likhegi
+    # 3. FFmpeg command: Padding aur alignment theek karne ke liye
+    # Note: Agar aapke system mein bold font available ho toh fontfile='path/to/bold-font.ttf' de sakte hain, 
+    # filhal hum font_weight ya size aur box/alignment ko theek kar rahe hain taake text cut na ho.
     ffmpeg_command = [
         'ffmpeg',
         '-y',
@@ -40,11 +39,12 @@ def make_video():
         '-i', 'image.webp',
         '-i', 'audio.mp3',
         '-filter_complex',
-        # Background canvas 1080x1920 (black), image ko top par fit karna, aur neeche drawtext lagana (bold aur w hata diye gaye hain)
+        # Background 1080x1920 (black), image ko bina top padding ke upar fit karna (overlay=0:0)
         f'color=c=black:s=1080x1920:d=10[base];'
         f'[0:v]scale=1080:-1[img];'
-        f'[base][img]overlay=0:40[bg_with_img];'
-        f'[bg_with_img]drawtext=text=\'{safe_title}\':fontcolor=white:fontsize=48:x=(w-text_w)/2:y=1150:box=1:boxcolor=black@0.9:boxborderw=25[final]',
+        f'[base][img]overlay=0:0[bg_with_img];'
+        # Text alignment center, wrapping width (w=980) taake text cut na ho, aur box padding behtar ki gayi hai
+        f'[bg_with_img]drawtext=text=\'{safe_title}\':fontcolor=white:fontsize=52:box=1:boxcolor=black@0.85:boxborderw=30:x=(w-text_w)/2:y=1200:wrap_w=950[final]',
         '-map', '[final]',
         '-map', '1:a',
         '-shortest',
