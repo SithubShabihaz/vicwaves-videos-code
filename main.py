@@ -40,11 +40,11 @@ def make_video():
         '-i', 'image.webp',
         '-i', 'audio.mp3',
         '-filter_complex',
-        # Background canvas 1080x1920 (black), image ko top par fit karna, aur neeche drawtext lagana
+        # Background canvas 1080x1920 (black), image ko top par fit karna, aur neeche drawtext lagana (bold aur w hata diye gaye hain)
         f'color=c=black:s=1080x1920:d=10[base];'
         f'[0:v]scale=1080:-1[img];'
         f'[base][img]overlay=0:40[bg_with_img];'
-        f'[bg_with_img]drawtext=text=\'{safe_title}\':fontcolor=white:fontsize=48:bold=1:w=950:x=(w-text_w)/2+25:y=1150:box=1:boxcolor=black@0.9:boxborderw=25[final]',
+        f'[bg_with_img]drawtext=text=\'{safe_title}\':fontcolor=white:fontsize=48:x=(w-text_w)/2:y=1150:box=1:boxcolor=black@0.9:boxborderw=25[final]',
         '-map', '[final]',
         '-map', '1:a',
         '-shortest',
