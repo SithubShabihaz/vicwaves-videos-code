@@ -62,7 +62,7 @@ def make_video():
         # Filter 1: Upar Red "Breaking News" Badge
         f'[bg_with_img]drawtext=fontfile=\'{font_path}\':text=\'Breaking News\':fontcolor=white:fontsize=46:box=1:boxcolor=red@0.95:boxborderw=18:x=(w-text_w)/2:y=80[with_badge];'
         # Filter 2: Image ke neeche Center-aligned Main Title
-        f'[with_badge]drawtext=fontfile=\'{font_path}\':text=\'{formatted_title}\':fontcolor=white:fontsize=78:line_spacing=2:x=(w-text_w)/2:y=820[with_title];'
+        f'[with_badge]drawtext=fontfile=\'{font_path}\':text=\'{formatted_title}\':fontcolor=white:fontsize=70:line_spacing=2:x=(w-text_w)/1:y=820[with_title];'
         # Filter 3: Title ke neeche Description Paragraph
         f'[with_title]drawtext=fontfile=\'{font_path}\':text=\'{formatted_desc}\':fontcolor=white@0.85:fontsize=35:line_spacing=4:x=(w-text_w)/2:y=1120[final]',
         '-map', '[final]',
