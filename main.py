@@ -1,77 +1,62 @@
 import os
 import requests
-import sys
-from moviepy.editor import ImageClip, AudioFileClip, CompositeVideoClip, TextClip, ColorClip
+import subprocess
 
 IMAGE_URL = os.environ.get("IMAGE_URL")
 AUDIO_URL = os.environ.get("AUDIO_URL")
 CALLBACK_URL = os.environ.get("CALLBACK_URL")
-# n8n ya command line se ane wala title (agar na mile toh default)
 POST_TITLE = os.environ.get("POST_TITLE", "Breaking News & Latest Updates")
 
 def make_video():
     print("Downloading files...")
     
-    # 1. Download Image with error handling
+    # 1. Download Image
     img_response = requests.get(IMAGE_URL)
     if img_response.status_code != 200 or len(img_response.content) < 100:
         raise Exception(f"Failed to download valid image from {IMAGE_URL}")
     with open("image.webp", "wb") as f:
         f.write(img_response.content)
 
-    # 2. Download Audio with error handling
+    # 2. Download Audio
     audio_response = requests.get(AUDIO_URL)
     if audio_response.status_code != 200 or len(audio_response.content) < 100:
         raise Exception(f"Failed to download valid audio from {AUDIO_URL}")
     with open("audio.mp3", "wb") as f:
         f.write(audio_response.content)
 
-    print("Generating vertical video layout with text...")
-    
-    # 3. Load Audio and get duration
-    audio_clip = AudioFileClip("audio.mp3")
-    duration = audio_clip.duration
+    print("Generating video using FFmpeg filter...")
 
-    # 4. Create Vertical Canvas (1080x1920) with Black Background
-    bg_clip = ColorClip(size=(1080, 1920), color=(0, 0, 0)).set_duration(duration)
+    # Title ko clean karna taake FFmpeg command mein koi error na aaye
+    safe_title = POST_TITLE.replace("'", "").replace('"', "").replace(":", "-")
 
-    # 5. Load and Resize Image to fit top (Width 1080, maintaining aspect ratio)
-    image_clip = ImageClip("image.webp").set_duration(duration)
-    # Image ko width 1080 par resize karna
-    image_clip = image_clip.resize(width=1080)
-    # Image ko top par set karna (y=0)
-    image_clip = image_clip.set_position(("center", "top"))
+    # 3. FFmpeg command jo image ko upar set karegi aur neeche black box par title likhegi
+    ffmpeg_command = [
+        'ffmpeg',
+        '-y',
+        '-loop', '1',
+        '-i', 'image.webp',
+        '-i', 'audio.mp3',
+        '-filter_complex',
+        # Background canvas 1080x1920 (black), image ko top par fit karna, aur neeche drawtext lagana
+        f'color=c=black:s=1080x1920:d=10[base];'
+        f'[0:v]scale=1080:-1[img];'
+        f'[base][img]overlay=0:40[bg_with_img];'
+        f'[bg_with_img]drawtext=text=\'{safe_title}\':fontcolor=white:fontsize=48:bold=1:w=950:x=(w-text_w)/2+25:y=1150:box=1:boxcolor=black@0.9:boxborderw=25[final]',
+        '-map', '[final]',
+        '-map', '1:a',
+        '-shortest',
+        '-c:v', 'libx264',
+        '-pix_fmt', 'yuv420p',
+        'final_video.mp4'
+    ]
 
-    # 6. Create Title Text Clip (White bold text with black background box)
-    # Note: ImageMagick ya system fonts ke mutabiq font adjust ho sakta hai
-    try:
-        txt_clip = TextClip(
-            POST_TITLE,
-            fontsize=45,
-            color='white',
-            font='Arial-Bold',
-            size=(980, None), # Width limit taake text wrap ho jaye
-            method='caption'
-        ).set_duration(duration)
-        
-        # Text ko image ke neeche position dena (maslan y=1100 ya image ke baad)
-        txt_clip = txt_clip.set_position(("center", 1150))
-        
-        # Combine everything using CompositeVideoClip
-        video_clip = CompositeVideoClip([bg_clip, image_clip, txt_clip])
-    except Exception as e:
-        print(f"TextClip warning ({e}), falling back to image + background only...")
-        # Agar TextClip mein font ka masla ho toh sirf background aur image combine karega
-        video_clip = CompositeVideoClip([bg_clip, image_clip])
-
-    # 7. Set Audio to Video
-    video_clip = video_clip.set_audio(audio_clip)
-    
-    # 8. Write final video file
-    video_clip.write_videofile("final_video.mp4", fps=24, codec="libx264", audio_codec="aac", logger=None)
+    # Run command
+    result = subprocess.run(ffmpeg_command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+    if result.returncode != 0:
+        raise Exception(f"FFmpeg failed: {result.stderr}")
 
     print("Sending video back to n8n...")
-    # 9. Send Video Back to n8n via Callback URL
+    # 4. Send Video Back to n8n via Callback URL
     if CALLBACK_URL:
         with open("final_video.mp4", "rb") as f:
             files = {'file': ('final_video.mp4', f, 'video/mp4')}
