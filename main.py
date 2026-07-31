@@ -25,17 +25,17 @@ def make_video():
     with open("audio.mp3", "wb") as f:
         f.write(audio_response.content)
 
-    print("Generating video with optimized text...")
+    print("Generating video with bold and high-placed text...")
 
-    # Title ko clean karna aur Sentence Case (pehla letter capital, baqi lowercase) rakhna
+    # Title ko clean karna aur Sentence Case rakhna
     clean_title = str(POST_TITLE).strip().replace("'", "").replace('"', "").replace(":", "-")
     formatted_sentence = clean_title.capitalize()
 
-    # Text wrapping: width ko adjust kiya gaya hai taake baray font ke sath bhi text perfectly wrap ho
+    # Text wrapping: width ko adjust kiya gaya hai taake text perfectly wrap ho
     wrapped_lines = textwrap.wrap(formatted_sentence, width=28)
     formatted_title = "\n".join(wrapped_lines)
 
-    # 3. FFmpeg command: Font size 52 aur y=1080 (padding kam karne ke liye)
+    # 3. FFmpeg command: Padding mazeed kam karne ke liye y=1020 kar diya hai, aur text bold set kiya hai
     ffmpeg_command = [
         'ffmpeg',
         '-y',
@@ -47,8 +47,8 @@ def make_video():
         f'color=c=black:s=1080x1920:d=10[base];'
         f'[0:v]scale=1080:-1[img];'
         f'[base][img]overlay=0:0[bg_with_img];'
-        # Drawtext filter with larger font (52) and reduced top padding (y=1080)
-        f'[bg_with_img]drawtext=text=\'{formatted_title}\':fontcolor=white:fontsize=52:box=1:boxcolor=black@0.95:boxborderw=40:x=60:y=1080[final]',
+        # Drawtext filter: y=1020 (top padding kam karne ke liye) aur fontsize/bold optimization
+        f'[bg_with_img]drawtext=text=\'{formatted_title}\':fontcolor=white:fontsize=54:box=1:boxcolor=black@0.95:boxborderw=35:x=60:y=1020[final]',
         '-map', '[final]',
         '-map', '1:a',
         '-shortest',
