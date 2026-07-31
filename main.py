@@ -7,6 +7,9 @@ AUDIO_URL = os.environ.get("AUDIO_URL")
 CALLBACK_URL = os.environ.get("CALLBACK_URL")
 POST_TITLE = os.environ.get("POST_TITLE", "Breaking News & Latest Updates")
 
+# Special characters ko clean karna taake FFmpeg command crash na ho
+safe_title = str(POST_TITLE).replace("'", "").replace('"', "").replace(":", "-")
+
 def make_video():
     print("Downloading files...")
     
