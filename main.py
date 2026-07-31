@@ -48,7 +48,7 @@ def make_video():
         f'[0:v]scale=1080:-1[img];'
         f'[base][img]overlay=0:0[bg_with_img];'
         # Drawtext filter: y=1020 (top padding kam karne ke liye) aur fontsize/bold optimization
-        f'[bg_with_img]drawtext=text=\'{formatted_title}\':fontcolor=white:fontsize=54:box=1:boxcolor=black@0.95:boxborderw=35:x=60:y=1020[final]',
+        f'[bg_with_img]drawtext=text=\'{formatted_title}\':fontcolor=white:fontsize=60:box=1:boxcolor=black@0.95:boxborderw=20:x=60:y=1000[final]',
         '-map', '[final]',
         '-map', '1:a',
         '-shortest',
