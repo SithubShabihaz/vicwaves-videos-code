@@ -6,7 +6,9 @@ import subprocess
 IMAGE_URL = os.environ.get("IMAGE_URL")
 AUDIO_URL = os.environ.get("AUDIO_URL")
 CALLBACK_URL = os.environ.get("CALLBACK_URL")
-POST_TITLE = os.environ.get("POST_TITLE", "Trump Warns Mamdani")
+POST_TITLE = os.environ.get("POST_TITLE", "Upcoming Social Security Adjustment")
+# Aap n8n ya environment se description bhi bhej sakti hain, yahan default text hai:
+POST_DESC = os.environ.get("POST_DESC", "The upcoming social security adjustment is drawing significant attention as early projections suggest beneficiaries could receive one of the largest Cost of Living Adjustments in recent years...")
 
 def make_video():
     print("Downloading files...")
@@ -25,19 +27,21 @@ def make_video():
     with open("audio.mp3", "wb") as f:
         f.write(audio_response.content)
 
-    print("Generating video with bold font and left/right spacing...")
+    print("Generating video with Breaking News badge, Image, Title and Description...")
 
-    # Title ko clean karna
+    # Title aur Description ko clean karna aur wrap karna
     clean_title = str(POST_TITLE).strip().replace("'", "").replace('"', "").replace(":", "-")
+    wrapped_title = textwrap.wrap(clean_title, width=24)
+    formatted_title = "\n".join(wrapped_title)
 
-    # Text wrapping: width=22 rakhne se text dono sides (left aur right) se andar rahega aur katega nahi
-    wrapped_lines = textwrap.wrap(clean_title, width=22)
-    formatted_title = "\n".join(wrapped_lines)
+    clean_desc = str(POST_DESC).strip().replace("'", "").replace('"', "").replace(":", "-")
+    wrapped_desc = textwrap.wrap(clean_desc, width=42)
+    formatted_desc = "\n".join(wrapped_desc)
 
     # Linux GitHub runner par mojood standard bold font ka path:
     font_path = "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"
 
-    # 3. FFmpeg command: Breaking news remove kar diya gaya hai aur x=60 se left/right margin set hai
+    # 3. FFmpeg command: Multi-filter setup (Breaking News badge, Image, Title, Description)
     ffmpeg_command = [
         'ffmpeg',
         '-y',
@@ -45,12 +49,17 @@ def make_video():
         '-i', 'image.webp',
         '-i', 'audio.mp3',
         '-filter_complex',
-        # Background 1080x1920 (black), image top par overlay=0:0
+        # Background 1080x1920 (black)
         f'color=c=black:s=1080x1920:d=10[base];'
+        # Image ko thoda neechay set karna taake uper "Breaking News" badge ke liye jagah ban jaye (overlay=0:120)
         f'[0:v]scale=1080:-1[img];'
-        f'[base][img]overlay=0:0[bg_with_img];'
-        # Main Bold Title (x=60 se left margin mil gaya hai, aur boxborderw=30 se padding set hai)
-        f'[bg_with_img]drawtext=fontfile=\'{font_path}\':text=\'{formatted_title}\':fontcolor=white:fontsize=75:line_spacing=4:box=1:boxcolor=black@0.95:boxborderw=30:x=60:y=730[final]',
+        f'[base][img]overlay=0:120[bg_with_img];'
+        # Filter 1: Upar Red "Breaking News" Badge
+        f'[bg_with_img]drawtext=fontfile=\'{font_path}\':text=\'Breaking News\':fontcolor=white:fontsize=46:box=1:boxcolor=red@0.95:boxborderw=18:x=(w-text_w)/2:y=40[with_badge];'
+        # Filter 2: Image ke neeche Center-aligned Main Title
+        f'[with_badge]drawtext=fontfile=\'{font_path}\':text=\'{formatted_title}\':fontcolor=white:fontsize=52:line_spacing=2:x=(w-text_w)/2:y=720[with_title];'
+        # Filter 3: Title ke neeche Description Paragraph
+        f'[with_title]drawtext=fontfile=\'{font_path}\':text=\'{formatted_desc}\':fontcolor=white@0.85:fontsize=28:line_spacing=4:x=(w-text_w)/2:y=1120[final]',
         '-map', '[final]',
         '-map', '1:a',
         '-shortest',
