@@ -50,7 +50,7 @@ def make_video():
         f'[0:v]scale=1080:-1[img];'
         f'[base][img]overlay=0:0[bg_with_img];'
         # Main Bold Title (x=60 se left margin mil gaya hai, aur boxborderw=30 se padding set hai)
-        f'[bg_with_img]drawtext=fontfile=\'{font_path}\':text=\'{formatted_title}\':fontcolor=white:fontsize=75:line_spacing=4:box=1:boxcolor=black@0.95:boxborderw=30:x=60:y=800[final]',
+        f'[bg_with_img]drawtext=fontfile=\'{font_path}\':text=\'{formatted_title}\':fontcolor=white:fontsize=75:line_spacing=4:box=1:boxcolor=black@0.95:boxborderw=30:x=60:y=730[final]',
         '-map', '[final]',
         '-map', '1:a',
         '-shortest',
