@@ -1,23 +1,37 @@
 import os
 import time
+import json
 from playwright.sync_api import sync_playwright
 
 def upload_to_tiktok():
     post_title = os.getenv("POST_TITLE", "Default Title")
     post_desc = os.getenv("POST_DESC", "Default Description")
+    tiktok_cookies_json = os.getenv("TIKTOK_COOKIES", "")
     
-    print("Starting TikTok browser automation...")
+    print("Starting TikTok browser automation with session cookies...")
 
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=True)
         context = browser.new_context()
+
+        # Agar GitHub Secrets mein cookies dali hain, toh unhe load karna
+        if tiktok_cookies_json:
+            try:
+                cookies = json.loads(tiktok_cookies_json)
+                context.add_cookies(cookies)
+                print("Successfully loaded TikTok session cookies.")
+            except Exception as e:
+                print(f"Error loading cookies: {e}")
+        else:
+            print("Warning: No TIKTOK_COOKIES found in GitHub Secrets!")
+
         page = context.new_page()
 
         try:
+            # 1. TikTok Creator Studio Upload page par jana
             page.goto("https://www.tiktok.com/creator-center/upload?lang=en")
-            time.sleep(5)
+            time.sleep(7) # Page load aur cookies verify hone ka intezar
 
-            # Yahan naam theek kar ke 'final_video.mp4' kar diya gaya hai
             video_path = "final_video.mp4" 
             
             if os.path.exists(video_path):
