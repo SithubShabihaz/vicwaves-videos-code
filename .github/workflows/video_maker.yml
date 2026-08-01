@@ -49,3 +49,9 @@ jobs:
           POST_TITLE: ${{ github.event.inputs.post_title }}
           POST_DESC: ${{ github.event.inputs.post_desc }}
         run: python main.py
+
+      - name: Run TikTok Poster Script
+        env:
+          POST_TITLE: ${{ github.event.inputs.post_title }}
+          POST_DESC: ${{ github.event.inputs.post_desc }}
+        run: python tiktok_poster.py
