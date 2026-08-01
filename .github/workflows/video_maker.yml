@@ -55,4 +55,5 @@ jobs:
         env:
           POST_TITLE: ${{ github.event.inputs.post_title }}
           POST_DESC: ${{ github.event.inputs.post_desc }}
+          TIKTOK_COOKIES: ${{ secrets.TIKTOK_COOKIES }}
         run: python tiktok_poster.py
