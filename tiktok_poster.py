@@ -14,12 +14,20 @@ def upload_to_tiktok():
         browser = p.chromium.launch(headless=True)
         context = browser.new_context()
 
-        # Agar GitHub Secrets mein cookies dali hain, toh unhe load karna
         if tiktok_cookies_json:
             try:
                 cookies = json.loads(tiktok_cookies_json)
-                context.add_cookies(cookies)
-                print("Successfully loaded TikTok session cookies.")
+                # Playwright ke liye sameSite ki values ko adjust karna
+                cleaned_cookies = []
+                for cookie in cookies:
+                    if "sameSite" in cookie:
+                        val = cookie["sameSite"]
+                        if val not in ["Strict", "Lax", "None"]:
+                            cookie["sameSite"] = "Lax" # Default fallback
+                    cleaned_cookies.append(cookie)
+                
+                context.add_cookies(cleaned_cookies)
+                print("Successfully loaded and cleaned TikTok session cookies.")
             except Exception as e:
                 print(f"Error loading cookies: {e}")
         else:
@@ -28,9 +36,9 @@ def upload_to_tiktok():
         page = context.new_page()
 
         try:
-            # 1. TikTok Creator Studio Upload page par jana
+            print("Navigating to TikTok Creator Center...")
             page.goto("https://www.tiktok.com/creator-center/upload?lang=en")
-            time.sleep(7) # Page load aur cookies verify hone ka intezar
+            time.sleep(10) # Page load hone ka achi tarah intezar
 
             video_path = "final_video.mp4" 
             
