@@ -1,66 +1,117 @@
 name: Generate Video
 
+
+
 on:
+
   workflow_dispatch:
+
     inputs:
+
       image_url:
+
         description: 'Image URL'
+
         required: true
+
         type: string
+
       audio_url:
+
         description: 'Audio URL'
+
         required: true
+
         type: string
+
       callback_url:
+
         description: 'Callback URL'
+
         required: true
+
         type: string
+
       post_title:
+
         description: 'Post Title'
+
         required: true
+
         type: string
+
       post_desc:
+
         description: 'Post Description'
+
         required: true
+
         type: string
+
+
 
 jobs:
+
   build:
+
     runs-on: ubuntu-latest
+
     steps:
+
       - uses: actions/checkout@v3
+
       
+
       - name: Set up Python
+
         uses: actions/setup-python@v4
+
         with:
+
           python-version: '3.10'
+
           
+
       - name: Install dependencies
+
         run: |
+
           sudo apt-get update
+
           sudo apt-get install -y ffmpeg
+
           pip install -r requirements.txt
+
           playwright install chromium
+
           
+
       - name: Run Video Script
+
         env:
+
           IMAGE_URL: ${{ github.event.inputs.image_url }}
+
           AUDIO_URL: ${{ github.event.inputs.audio_url }}
+
           CALLBACK_URL: ${{ github.event.inputs.callback_url }}
+
           POST_TITLE: ${{ github.event.inputs.post_title }}
+
           POST_DESC: ${{ github.event.inputs.post_desc }}
+
         run: python main.py
 
-      - name: Run TikTok Poster Script
-        env:
-          POST_TITLE: ${{ github.event.inputs.post_title }}
-          POST_DESC: ${{ github.event.inputs.post_desc }}
-          TIKTOK_COOKIES: ${{ secrets.TIKTOK_COOKIES }}
-        run: python tiktok_poster.py
 
-      - name: Upload Screenshots if failed
-        uses: actions/upload-artifact@v3
-        if: always()
-        with:
-          name: tiktok-screenshots
-          path: *.png
+
+      - name: Run TikTok Poster Script
+
+        env:
+
+          POST_TITLE: ${{ github.event.inputs.post_title }}
+
+          POST_DESC: ${{ github.event.inputs.post_desc }}
+
+          TIKTOK_COOKIES: ${{ secrets.TIKTOK_COOKIES }}
+
+        run: python tiktok_poster.py
