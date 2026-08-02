@@ -57,10 +57,3 @@ jobs:
           POST_DESC: ${{ github.event.inputs.post_desc }}
           TIKTOK_COOKIES: ${{ secrets.TIKTOK_COOKIES }}
         run: python tiktok_poster.py
-
-      - name: Upload Screenshots if failed
-        uses: actions/upload-artifact@v3
-        if: always()
-        with:
-          name: tiktok-screenshots
-          path: *.png
